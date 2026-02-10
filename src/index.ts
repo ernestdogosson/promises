@@ -1,8 +1,8 @@
-const drink = () => {
-  return new Promise<string>((resolve, reject) => {
+const drink = (): Promise<string> => {
+  return new Promise((resolve, reject) => {
     setTimeout(() => {
       if (Math.random() < 0.5) {
-        resolve("You get a drink");
+        resolve("You get a drink and a joke. Enjoy!");
       } else {
         reject("Out of stock. Try again.");
       }
@@ -10,23 +10,27 @@ const drink = () => {
   });
 };
 
-// drink().then(console.log).catch(console.log);
+type Joke = { setup: string; punchline: string };
 
-const jokes = (id: number) => {
-  const promise = fetch("https://official-joke-api.appspot.com/random_joke")
-    .then((response) => response.json())
+const getJoke = (): Promise<void> =>
+  fetch("https://official-joke-api.appspot.com/random_joke")
+    .then((response) => response.json() as Promise<Joke>)
     .then((data) => {
-      let jokeSetup = data.setup;
-      console.log(jokeSetup);
-
-      setTimeout(() => {
-        const jokePunchline = data.punchline;
-        console.log(jokePunchline);
-      }, 5000);
-    })
-    .catch((error) => {
-      console.log(`Error fetching joke: ${error}.`);
+      console.log(data.setup);
+      return new Promise<void>((resolve) => {
+        setTimeout(() => {
+          console.log(data.punchline);
+          resolve();
+        }, 2000);
+      });
     });
-};
 
-jokes(1);
+drink()
+  .then((message) => {
+    console.log(message);
+    return getJoke();
+  })
+  .then(() => {
+    console.log("Reward finished");
+  })
+  .catch(console.log);
