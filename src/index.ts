@@ -12,25 +12,35 @@ const drink = (): Promise<string> => {
 
 type Joke = { setup: string; punchline: string };
 
-const getJoke = (): Promise<void> =>
-  fetch("https://official-joke-api.appspot.com/random_joke")
-    .then((response) => response.json() as Promise<Joke>)
-    .then((data) => {
-      console.log(data.setup);
-      return new Promise<void>((resolve) => {
-        setTimeout(() => {
-          console.log(data.punchline);
-          resolve();
-        }, 2000);
-      });
-    });
+const getJoke = async (): Promise<void> => {
+  const response = await fetch(
+    "https://official-joke-api.appspot.com/random_joke",
+  );
+  const data = (await response.json()) as Joke;
 
-drink()
-  .then((message) => {
+  await new Promise<void>((resolve) => {
+    setTimeout(() => {
+      console.log(data.setup);
+      resolve();
+    }, 1000);
+  });
+
+  await new Promise<void>((resolve) => {
+    setTimeout(() => {
+      console.log(data.punchline);
+      resolve();
+    }, 4000);
+  });
+};
+
+const main = async (): Promise<void> => {
+  try {
+    const message = await drink();
     console.log(message);
-    return getJoke();
-  })
-  .then(() => {
-    console.log("Reward finished");
-  })
-  .catch(console.log);
+    await getJoke();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+main();
